@@ -3,9 +3,10 @@ import logging
 import sys
 import os
 from dotenv import load_dotenv
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, F
 from aiogram.enums import ParseMode
 from handlers import user_commands, admin_commands
+from callbacks import admin_callbacks
 from data import create_db
 
 load_dotenv(".env")
@@ -18,6 +19,7 @@ async def main():
         user_commands.router,
         admin_commands.router,
     )
+    dp.callback_query.register(admin_callbacks.admin, F.data.startwith("adm"))
 
     create_db.create()
     await bot.delete_webhook(drop_pending_updates=True)
