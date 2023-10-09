@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
-from handlers import user_commands
+from handlers import user_commands, admin_commands
 from data import create_db
 
 load_dotenv(".env")
@@ -14,7 +14,10 @@ bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
 
 async def main():
     dp = Dispatcher()
-    dp.include_routers(user_commands.router,)
+    dp.include_routers(
+        user_commands.router,
+        admin_commands.router,
+    )
 
     create_db.create()
     await bot.delete_webhook(drop_pending_updates=True)
