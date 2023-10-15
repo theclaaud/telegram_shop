@@ -13,9 +13,17 @@ admin_btns = [
 admin_mk = InlineKeyboardMarkup(inline_keyboard=admin_btns)
 
 setup_cut_btns = [
-    [InlineKeyboardButton(text="Додати категорію", callback_data=AdminHandler(value = "category", action="add").pack())],
-    [InlineKeyboardButton(text="Видалити категорію", callback_data=AdminHandler(value = "category", action="remove").pack())],
-    [InlineKeyboardButton(text="Список категорій", callback_data=AdminHandler(value = "category", action="list").pack())],
-    [InlineKeyboardButton(text="Назад", callback_data=AdminHandler(value = "back").pack())],
+    [InlineKeyboardButton(text="➕ Додати категорію", callback_data=AdminHandler(value = "category", action="add").pack())],
+    [InlineKeyboardButton(text="➖ Видалити категорію", callback_data=AdminHandler(value = "category", action="remove").pack())],
+    [InlineKeyboardButton(text="📋 Список категорій", callback_data=AdminHandler(value = "category", action="list").pack())],
+    [InlineKeyboardButton(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())],
 ]
 setup_cut_mk = InlineKeyboardMarkup(inline_keyboard=setup_cut_btns)
+
+setup_lots_btns = [
+    [InlineKeyboardButton(text="➕ Додати товар", callback_data=AdminHandler(value = "lots", action="add").pack())],
+    [InlineKeyboardButton(text="➖ Видалити товар", callback_data=AdminHandler(value = "lots", action="remove").pack())],
+    [InlineKeyboardButton(text="📋 Список товарів", callback_data=AdminHandler(value = "lots", action="list").pack())],
+    [InlineKeyboardButton(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())],
+]
+setup_lot_mk = InlineKeyboardMarkup(inline_keyboard=setup_lots_btns)

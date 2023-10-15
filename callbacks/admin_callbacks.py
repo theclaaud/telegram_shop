@@ -1,6 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
-from keyboards.inline import AdminHandler, setup_cut_mk, admin_mk
+from keyboards.inline import AdminHandler, setup_cut_mk, admin_mk, setup_lot_mk
 
 router = Router()
 
@@ -8,25 +8,27 @@ router = Router()
 async def setup_categories(query: CallbackQuery, callback_data: AdminHandler):
     if callback_data.action == "add":
         await query.message.edit_text("add")
-        await query.answer()
     elif callback_data.action == "remove":
         await query.message.edit_text("remove")
-        await query.answer()
     elif callback_data.action == "list":
         await query.message.edit_text("list")
-        await query.answer()
     else:
         await query.message.edit_text("Виберіть дію:",reply_markup=setup_cut_mk)
-        await query.answer()
 
 @router.callback_query(AdminHandler.filter(F.value == "lots"))
 async def setup_lots(query: CallbackQuery, callback_data: AdminHandler):
-    await query.message.answer("lots")
-    await query.answer()
+    if callback_data.action == "add":
+        await query.message.edit_text("add")
+    elif callback_data.action == "remove":
+        await query.message.edit_text("remove")
+    elif callback_data.action == "list":
+        await query.message.edit_text("list")
+    else:
+        await query.message.edit_text("Виберіть дію:",reply_markup=setup_lot_mk)
 
 @router.callback_query(AdminHandler.filter(F.value == "users"))
 async def setup_users(query: CallbackQuery, callback_data: AdminHandler):
-    await query.message.answer("users")
+    await query.message.edit_text("Введіть id користувача:") # тут фсм типо будет
     await query.answer()
 
 @router.callback_query(AdminHandler.filter(F.value == "back"))
