@@ -3,7 +3,7 @@ from aiogram.filters.callback_data import CallbackData
 
 class AdminHandler(CallbackData, prefix="admin"):
     value: str
-    action: str = "false"
+    action: str = "_"
 
 admin_btns = [
     [InlineKeyboardButton(text="🏪 Змінити категорії", callback_data=AdminHandler(value = "category").pack())],
