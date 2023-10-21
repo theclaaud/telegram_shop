@@ -1,9 +1,18 @@
+import sqlite3
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters.callback_data import CallbackData
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+con = sqlite3.connect("database.db")
+cur = con.cursor()
 
 class AdminHandler(CallbackData, prefix="admin"):
     value: str
     action: str = "_"
+
+class RemoveItems(CallbackData, prefix="remove_item"):
+    type: str
+    id: int
 
 admin_btns = [
     [InlineKeyboardButton(text="🏪 Змінити категорії", callback_data=AdminHandler(value = "category").pack())],
@@ -27,3 +36,34 @@ setup_lots_btns = [
     [InlineKeyboardButton(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())],
 ]
 setup_lot_mk = InlineKeyboardMarkup(inline_keyboard=setup_lots_btns)
+
+back_mk = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())],])
+
+clear_state_mk = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="Скасувати", callback_data=AdminHandler(value = "clear_state").pack())]]
+    )
+
+def remove_category_mk():
+    builder = InlineKeyboardBuilder()
+    categories_list = cur.execute("SELECT * FROM categories").fetchall()
+
+    for category in categories_list:
+        builder.add(InlineKeyboardButton
+                    (text=category[1],
+                    callback_data=RemoveItems(type="category", id = category[0]).pack()))
+
+    builder.button(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())
+    builder.adjust(1)
+    return builder.as_markup()
+
+def categories_list_mk():
+    builder = InlineKeyboardBuilder()
+    categories_list = cur.execute("SELECT * FROM categories").fetchall()
+
+    for category in categories_list:
+        builder.add(InlineKeyboardButton(text=category[1], callback_data=AdminHandler(value = "category_click").pack()))
+
+    builder.button(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())
+    builder.adjust(1)
+    return builder.as_markup()
