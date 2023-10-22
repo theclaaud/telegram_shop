@@ -44,26 +44,74 @@ clear_state_mk = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="Скасувати", callback_data=AdminHandler(value = "clear_state").pack())]]
     )
 
-def remove_category_mk():
-    builder = InlineKeyboardBuilder()
-    categories_list = cur.execute("SELECT * FROM categories").fetchall()
+# markup for remove category
 
-    for category in categories_list:
+def smart_builder(type: str, action: str, id: int = None):
+    builder = InlineKeyboardBuilder()
+
+    db = {
+        "category": cur.execute(f"SELECT * FROM categories").fetchall(),
+        "lot": cur.execute(f"SELECT * FROM lots").fetchall(),
+        "lot_with_cat": cur.execute(f"SELECT * FROM lots WHERE category = ?",(id,)).fetchall(),
+    }
+    for category in db[type]:
+        callback_data = {
+            "remove": RemoveItems(type=type, id = category[0]).pack(),
+            "list": AdminHandler(value = "category_click").pack(),
+            "add_lot_category": AdminHandler(value = "add_lot_category", action=str(category[0])).pack(),
+            "select_cat_for_remove_lot": AdminHandler(value = "select_cat_for_remove_lot", action=str(category[0])).pack(),
+        }
+        
         builder.add(InlineKeyboardButton
                     (text=category[1],
-                    callback_data=RemoveItems(type="category", id = category[0]).pack()))
+                    callback_data=callback_data[action]))
 
     builder.button(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())
     builder.adjust(1)
     return builder.as_markup()
 
-def categories_list_mk():
-    builder = InlineKeyboardBuilder()
-    categories_list = cur.execute("SELECT * FROM categories").fetchall()
+# categories list
+# def categories_list_mk():
+#     builder = InlineKeyboardBuilder()
+#     categories_list = cur.execute("SELECT * FROM categories").fetchall()
 
-    for category in categories_list:
-        builder.add(InlineKeyboardButton(text=category[1], callback_data=AdminHandler(value = "category_click").pack()))
+#     for category in categories_list:
+#         builder.add(InlineKeyboardButton(text=category[1], callback_data=AdminHandler(value = "category_click").pack()))
 
-    builder.button(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())
-    builder.adjust(1)
-    return builder.as_markup()
+#     builder.button(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())
+#     builder.adjust(1)
+#     return builder.as_markup()
+
+# select category for add new lot
+# def select_cat_mk():
+#     builder = InlineKeyboardBuilder()
+#     categories_list = cur.execute("SELECT * FROM categories").fetchall()
+
+#     for category in categories_list:
+#         builder.add(InlineKeyboardButton(text=category[1], callback_data=AdminHandler(value = "add_lot_category", action=str(category[0])).pack()))
+
+#     builder.adjust(1)
+#     return builder.as_markup()
+
+# for remove
+# def select_cat_for_lot_mk():
+#     builder = InlineKeyboardBuilder()
+#     categories_list = cur.execute("SELECT * FROM categories").fetchall()
+
+#     for category in categories_list:
+#         builder.add(InlineKeyboardButton(text=category[1], callback_data=AdminHandler(value = "category_click").pack()))
+
+#     builder.button(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())
+#     builder.adjust(1)
+#     return builder.as_markup()
+
+# def select_lot_for_remove_mk():
+#     builder = InlineKeyboardBuilder()
+#     lots_list = cur.execute("SELECT * FROM lots").fetchall()
+
+#     for lot in lots_list:
+#         builder.add(InlineKeyboardButton(text=f"{lot[1]} | {lot[2]}грн", callback_data=AdminHandler(value = "category_click").pack()))
+
+#     builder.button(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())
+#     builder.adjust(1)
+#     return builder.as_markup()

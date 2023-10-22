@@ -27,6 +27,6 @@ def create():
         title    TEXT    NOT NULL,
         price    INTEGER NOT NULL,
         category TEXT    NOT NULL
-                        REFERENCES categories (title) ON UPDATE CASCADE
+                        REFERENCES categories (id) ON UPDATE CASCADE
     );
 """)
