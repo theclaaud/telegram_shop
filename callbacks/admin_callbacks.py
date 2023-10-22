@@ -18,9 +18,9 @@ async def setup_categories(query: CallbackQuery, callback_data: AdminHandler, st
         await query.message.answer("➕ Введіть назву категорії:", reply_markup=clear_state_mk)
         await query.answer()
     elif callback_data.action == "remove":
-        await query.message.edit_text("Виберіть яку категорію видалити:", reply_markup=smart_builder(type="category", action="remove", admin=True))
+        await query.message.edit_text("Виберіть яку категорію видалити:", reply_markup=smart_builder(type="category", action="remove", back_type=1))
     elif callback_data.action == "list":
-        await query.message.edit_text("Список категорій:", reply_markup=smart_builder(type="category", action="list", admin=True))
+        await query.message.edit_text("Список категорій:", reply_markup=smart_builder(type="category", action="list", back_type=1))
     else:
         await query.message.edit_text("Виберіть дію:", reply_markup=setup_cut_mk)
 
@@ -45,9 +45,9 @@ async def setup_lots(query: CallbackQuery, callback_data: AdminHandler, state: F
         await query.message.answer("➕ Введіть <b>назву</b> товару:", reply_markup=clear_state_mk)
         await query.answer()
     elif callback_data.action == "remove":
-        await query.message.edit_text("Виберіть <b>категрію</b>, в якій знаходиться <b>товар</b>, який потрібно <b>видалити</b>",reply_markup=smart_builder(type="category", action="select_cat_for_remove_lot", admin=True))
+        await query.message.edit_text("Виберіть <b>категрію</b>, в якій знаходиться <b>товар</b>, який потрібно <b>видалити</b>",reply_markup=smart_builder(type="category", action="select_cat_for_remove_lot", back_type=1))
     elif callback_data.action == "list":
-        await query.message.edit_text("Список товарів:",reply_markup=smart_builder(type="lot", action="list", admin=True))
+        await query.message.edit_text("Список товарів:",reply_markup=smart_builder(type="lot", action="list", back_type=1))
     else:
         await query.message.edit_text("Виберіть дію:", reply_markup=setup_lot_mk)
 
@@ -62,7 +62,7 @@ async def add_lot_price(message: Message, state: FSMContext):
     if message.text.isdigit():
         await state.update_data(price=message.text)
         await state.set_state(AddLot.category)
-        await message.answer("Добре, тепер виберіть <b>категорію</b> товару", reply_markup=smart_builder(type="category", action="add_lot_category", admin=True))
+        await message.answer("Добре, тепер виберіть <b>категорію</b> товару", reply_markup=smart_builder(type="category", action="add_lot_category", back_type=1))
     else:
         await message.answer("Введіть число!")
 
@@ -78,9 +78,9 @@ async def add_lot_category(query: CallbackQuery, callback_data: AdminHandler, st
 
 @router.callback_query(AdminHandler.filter(F.value == "select_cat_for_remove_lot"))
 async def enter_lot_remove(query: CallbackQuery, callback_data: AdminHandler):
-    await query.message.edit_text("Добре, тепер <b>виберіть товар</b> який потрібно <b>видалити</b>",reply_markup=smart_builder(type="lot_with_cat", action="remove", id=callback_data.action, admin=True))
+    await query.message.edit_text("Добре, тепер <b>виберіть товар</b> який потрібно <b>видалити</b>",reply_markup=smart_builder(type="lot_with_cat", action="remove", id=callback_data.action, back_type=1))
 
-@router.callback_query(RemoveItems.filter(F.type == "lot_with_cut"))
+@router.callback_query(RemoveItems.filter(F.type == "lot_with_cat"))
 async def remove_lot(query: CallbackQuery, callback_data: AdminHandler):
     remove_id = callback_data.id
     cur.execute("DELETE FROM lots WHERE id = ?", (remove_id,))
