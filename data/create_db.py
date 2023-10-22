@@ -30,7 +30,7 @@ def create():
     );
 """)
     cur.execute("""
-    CREATE TABLE orders (
+    CREATE TABLE IF NOT EXISTS orders (
         id       INTEGER PRIMARY KEY AUTOINCREMENT
                         NOT NULL
                         UNIQUE,
