@@ -77,11 +77,11 @@ async def add_lot_category(query: CallbackQuery, callback_data: AdminHandler, st
     await state.clear()
 
 @router.callback_query(AdminHandler.filter(F.value == "select_cat_for_remove_lot"))
-async def add_lot_category(query: CallbackQuery, callback_data: AdminHandler):
+async def enter_lot_remove(query: CallbackQuery, callback_data: AdminHandler):
     await query.message.edit_text("Добре, тепер <b>виберіть товар</b> який потрібно <b>видалити</b>",reply_markup=smart_builder(type="lot_with_cat", action="remove", id=callback_data.action, admin=True))
 
 @router.callback_query(RemoveItems.filter(F.type == "lot_with_cut"))
-async def remove_category(query: CallbackQuery, callback_data: AdminHandler):
+async def remove_lot(query: CallbackQuery, callback_data: AdminHandler):
     remove_id = callback_data.id
     cur.execute("DELETE FROM lots WHERE id = ?", (remove_id,))
     con.commit()
