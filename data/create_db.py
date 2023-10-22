@@ -29,3 +29,15 @@ def create():
                         REFERENCES categories (id) ON UPDATE CASCADE
     );
 """)
+    cur.execute("""
+    CREATE TABLE orders (
+        id       INTEGER PRIMARY KEY AUTOINCREMENT
+                        NOT NULL
+                        UNIQUE,
+        buyer_id INTEGER REFERENCES users (id) 
+                        NOT NULL,
+        lot_id   INTEGER REFERENCES lots (id) 
+                        NOT NULL,
+        summ     INTEGER NOT NULL
+    );
+""")
