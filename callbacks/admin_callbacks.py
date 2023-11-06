@@ -69,11 +69,18 @@ async def add_lot_price(message: Message, state: FSMContext):
 @router.callback_query(AdminHandler.filter(F.value == "add_lot_category"))
 async def add_lot_category(query: CallbackQuery, callback_data: AdminHandler, state: FSMContext):
     await state.update_data(category = callback_data.action)
+    await query.message.edit_text("Відправте фото товару:")
+
+    await state.set_state(AddLot.image)
+
+@router.message(AddLot.image, F.photo)
+async def add_lot_image(message: Message, state: FSMContext):
+    await state.update_data(image = message.photo[-1].file_id)
     items = await state.get_data()
-    cur.execute("INSERT INTO lots (title, price, category) VALUES (?, ?, ?)", (items["title"], items["price"], items["category"]))
+    cur.execute("INSERT INTO lots (title, price, image_id, category) VALUES (?, ?, ?, ?)", (items["title"], items["price"], items["image"], items["category"]))
     con.commit()
-    await query.message.edit_text("\n".join([f"{key}: {item}" for key, item in (await state.get_data()).items()]))
-    await query.answer()
+
+    await message.answer_photo(photo=message.photo[-1].file_id, caption="\n".join([f"{key}: {item}" for key, item in (await state.get_data()).items()]))
     await state.clear()
 
 @router.callback_query(AdminHandler.filter(F.value == "select_cat_for_remove_lot"))

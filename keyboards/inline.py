@@ -67,7 +67,7 @@ def smart_builder(type: str, action: str, id: int = None, back_type: int = None)
         }
         
         builder.add(InlineKeyboardButton
-                    (text=f"{category[1]} {['' if type!='lot_with_cat' else f'| {category[2]} ₴'][0]}",
+                    (text=f"{category[1]} {['' if type!='lot_with_cat' else f'| {category[3]} ₴'][0]}",
                     callback_data=callback_data[action]))
         
     match back_type:

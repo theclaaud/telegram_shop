@@ -21,11 +21,13 @@ def create():
 """)
     cur.execute("""
     CREATE TABLE IF NOT EXISTS lots (
-        id       INTEGER PRIMARY KEY AUTOINCREMENT
+    id          INTEGER PRIMARY KEY AUTOINCREMENT
                         NOT NULL,
-        title    TEXT    NOT NULL,
-        price    INTEGER NOT NULL,
-        category TEXT    NOT NULL
+    title       TEXT    NOT NULL,
+    description TEXT,
+    price       INTEGER NOT NULL,
+    image_id    INTEGER,
+    category    TEXT    NOT NULL
                         REFERENCES categories (id) ON UPDATE CASCADE
     );
 """)

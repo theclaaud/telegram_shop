@@ -13,10 +13,14 @@ async def category_list(query: CallbackQuery, callback_data: UserChoose):
 
 @router.callback_query(UserChoose.filter(F.type == "category"))
 async def choose_lot(query: CallbackQuery, callback_data: UserChoose):
-    await query.message.edit_text("Добре, тепер виберіть товар", reply_markup=smart_builder(type="lot_with_cat", action="choose_lot", id=callback_data.id, back_type=2))
+    await query.message.delete()
+    await query.message.answer("Добре, тепер виберіть товар", reply_markup=smart_builder(type="lot_with_cat", action="choose_lot", id=callback_data.id, back_type=2))
 
 @router.callback_query(UserChoose.filter(F.type == "lot"))
 async def lot(query: CallbackQuery, callback_data: UserChoose):
     lot_data = cur.execute("SELECT * FROM lots WHERE id = ?",(callback_data.id,)).fetchone()
-    category_title = cur.execute("SELECT title FROM categories WHERE id = ?",(lot_data[3],)).fetchone()[0]
-    await query.message.edit_text(f"<b>{lot_data[1]}</b> \n{lot_data[2]}₴ \n{category_title}", reply_markup=buy_builder(lot_data[0],lot_data[3], lot_data[2]))
+    category_title = cur.execute("SELECT title FROM categories WHERE id = ?",(lot_data[5],)).fetchone()[0]
+    
+    await query.message.delete()
+    await query.message.answer_photo(photo=lot_data[4],caption=f"<b>{lot_data[1]}</b> \n{lot_data[3]}₴ \n{category_title}", reply_markup=buy_builder(lot_data[0],lot_data[5], lot_data[3]))
+    # await query.message.edit_text(f"<b>{lot_data[1]}</b> \n{lot_data[3]}₴ \n{category_title}", reply_markup=buy_builder(lot_data[0],lot_data[5], lot_data[3]))
