@@ -5,6 +5,7 @@ class AddCategory(StatesGroup):
 
 class AddLot(StatesGroup):
     title = State()
+    description = State()
     price = State()
     category = State()
     image = State()

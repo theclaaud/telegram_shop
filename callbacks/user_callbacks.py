@@ -22,5 +22,5 @@ async def lot(query: CallbackQuery, callback_data: UserChoose):
     category_title = cur.execute("SELECT title FROM categories WHERE id = ?",(lot_data[5],)).fetchone()[0]
     
     await query.message.delete()
-    await query.message.answer_photo(photo=lot_data[4],caption=f"<b>{lot_data[1]}</b> \n{lot_data[3]}₴ \n{category_title}", reply_markup=buy_builder(lot_data[0],lot_data[5], lot_data[3]))
+    await query.message.answer_photo(photo=lot_data[4],caption=f"<b>{lot_data[1]} - {category_title}</b>\n{lot_data[2]}", reply_markup=buy_builder(lot_data[0],lot_data[5], lot_data[3]))
     # await query.message.edit_text(f"<b>{lot_data[1]}</b> \n{lot_data[3]}₴ \n{category_title}", reply_markup=buy_builder(lot_data[0],lot_data[5], lot_data[3]))

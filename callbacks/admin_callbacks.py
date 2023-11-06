@@ -54,6 +54,12 @@ async def setup_lots(query: CallbackQuery, callback_data: AdminHandler, state: F
 @router.message(AddLot.title)
 async def add_lot_title(message: Message, state: FSMContext):
     await state.update_data(title=message.text)
+    await state.set_state(AddLot.description)
+    await message.answer("Добре, тепер введіть <b>опис</b> товару")
+
+@router.message(AddLot.description)
+async def add_lot_description(message: Message, state: FSMContext):
+    await state.update_data(description=message.text)
     await state.set_state(AddLot.price)
     await message.answer("Добре, тепер введіть <b>ціну</b> товару")
 
@@ -77,7 +83,7 @@ async def add_lot_category(query: CallbackQuery, callback_data: AdminHandler, st
 async def add_lot_image(message: Message, state: FSMContext):
     await state.update_data(image = message.photo[-1].file_id)
     items = await state.get_data()
-    cur.execute("INSERT INTO lots (title, price, image_id, category) VALUES (?, ?, ?, ?)", (items["title"], items["price"], items["image"], items["category"]))
+    cur.execute("INSERT INTO lots (title, description, price, image_id, category) VALUES (?, ?, ?, ?, ?)", (items["title"], items["description"], items["price"], items["image"], items["category"]))
     con.commit()
 
     await message.answer_photo(photo=message.photo[-1].file_id, caption="\n".join([f"{key}: {item}" for key, item in (await state.get_data()).items()]))
