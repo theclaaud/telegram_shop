@@ -7,7 +7,6 @@ def create():
     id           INTEGER PRIMARY KEY
                          NOT NULL
                          UNIQUE,
-    phone_number TEXT,
     is_admin     BOOLEAN DEFAULT (0)
 );
 """)

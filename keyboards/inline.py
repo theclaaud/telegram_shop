@@ -99,7 +99,7 @@ def back_builder(to: str, id: int = None):
 
 def buy_builder(id: int,category_id: int, price: int):
     builder = InlineKeyboardBuilder()
-    builder.button(text=f"{price}₴ | Купити ✅", callback_data=UserChoose(type = "buy_lot").pack())
+    builder.button(text=f"{price}₴ | Купити ✅", callback_data=UserChoose(type = "buy_lot",id = id).pack())
     builder.attach(back_builder(to="lots", id=category_id))
 
     builder.adjust(1)
