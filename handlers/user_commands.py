@@ -18,10 +18,6 @@ async def command_start_handler(message: Message):
 async def category_list(message: types.Message):
     await message.answer("Виберіть потрібну <b>категорію:</b>", reply_markup=inline.smart_builder(type="category", action="user_category"))
 
-@router.message(F.text == "🔎 Пошук")
-async def category_list(message: types.Message):
-    await message.answer("Пошук")
-
 @router.message(F.text == "🤵 Особистий кабінет")
 async def help(message: types.Message):
     await message.answer("Особистий кабінет")
