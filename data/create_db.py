@@ -7,8 +7,6 @@ def create():
     id           INTEGER PRIMARY KEY
                          NOT NULL
                          UNIQUE,
-    balance      INTEGER DEFAULT (0),
-    phone_number TEXT,
     is_admin     BOOLEAN DEFAULT (0)
 );
 """)
@@ -22,11 +20,25 @@ def create():
 """)
     cur.execute("""
     CREATE TABLE IF NOT EXISTS lots (
-        id       INTEGER PRIMARY KEY AUTOINCREMENT
+    id          INTEGER PRIMARY KEY AUTOINCREMENT
                         NOT NULL,
-        title    TEXT    NOT NULL,
-        price    INTEGER NOT NULL,
-        category TEXT    NOT NULL
-                        REFERENCES categories (title) ON UPDATE CASCADE
+    title       TEXT    NOT NULL,
+    description TEXT,
+    price       INTEGER NOT NULL,
+    image_id    INTEGER,
+    category    TEXT    NOT NULL
+                        REFERENCES categories (id) ON UPDATE CASCADE
+    );
+""")
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS orders (
+        id       INTEGER PRIMARY KEY AUTOINCREMENT
+                        NOT NULL
+                        UNIQUE,
+        buyer_id INTEGER REFERENCES users (id) 
+                        NOT NULL,
+        lot_id   INTEGER REFERENCES lots (id) 
+                        NOT NULL,
+        summ     INTEGER NOT NULL
     );
 """)

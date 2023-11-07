@@ -16,16 +16,12 @@ async def command_start_handler(message: Message):
 
 @router.message(F.text == "🛒 Каталог товарів")
 async def category_list(message: types.Message):
-    await message.answer("Каталог товарів")
+    await message.answer("Виберіть потрібну <b>категорію:</b>", reply_markup=inline.smart_builder(type="category", action="user_category"))
 
-@router.message(F.text == "🔎 Пошук")
-async def category_list(message: types.Message):
-    await message.answer("Пошук")
-
-@router.message(F.text == "👨 Особистий кабінет")
+@router.message(F.text == "🤵 Особистий кабінет")
 async def help(message: types.Message):
-    await message.answer("Особистий кабінет")
+    await message.answer(f"Вітаю, <b>{message.from_user.first_name}</b>\nВаш ID: <code>{message.from_user.id}</code>\nВаші замовлення:",reply_markup=inline.user_orders(message.from_user.id))
 
 @router.message(F.text == "⁉️ Допомога")
 async def help(message: types.Message):
-    await message.answer("Допомога")
+    await message.answer("Тех.підтримка: @theclaud")

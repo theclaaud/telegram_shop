@@ -14,6 +14,10 @@ class RemoveItems(CallbackData, prefix="remove_item"):
     type: str
     id: int
 
+class UserChoose(CallbackData, prefix="user"):
+    type: str
+    id: int = 0
+
 admin_btns = [
     [InlineKeyboardButton(text="🏪 Змінити категорії", callback_data=AdminHandler(value = "category").pack())],
     [InlineKeyboardButton(text="🛍️ Змінити товари", callback_data=AdminHandler(value = "lots").pack())],
@@ -44,26 +48,70 @@ clear_state_mk = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="Скасувати", callback_data=AdminHandler(value = "clear_state").pack())]]
     )
 
-def remove_category_mk():
+def smart_builder(type: str, action: str, id: int = None, back_type: int = None):
     builder = InlineKeyboardBuilder()
-    categories_list = cur.execute("SELECT * FROM categories").fetchall()
 
-    for category in categories_list:
+    db = {
+        "category": cur.execute(f"SELECT * FROM categories").fetchall(),
+        "lot": cur.execute(f"SELECT * FROM lots").fetchall(),
+        "lot_with_cat": cur.execute(f"SELECT * FROM lots WHERE category = ?",(id,)).fetchall(),
+    }
+    for category in db[type]:
+        callback_data = {
+            "remove": RemoveItems(type=type, id = category[0]).pack(),
+            "list": AdminHandler(value = "category_click").pack(),
+            "add_lot_category": AdminHandler(value = "add_lot_category", action=str(category[0])).pack(),
+            "select_cat_for_remove_lot": AdminHandler(value = "select_cat_for_remove_lot", action=str(category[0])).pack(),
+            "user_category": UserChoose(type = "category", id=category[0]).pack(),
+            "choose_lot": UserChoose(type = "lot", id=category[0]).pack(),
+        }
+        
         builder.add(InlineKeyboardButton
-                    (text=category[1],
-                    callback_data=RemoveItems(type="category", id = category[0]).pack()))
+                    (text=f"{category[1]} {['' if type!='lot_with_cat' else f'| {category[3]} ₴'][0]}",
+                    callback_data=callback_data[action]))
+        
+    match back_type:
+        case 1:
+            builder.attach(back_builder(to="admin"))
+        case 2:
+            builder.attach(back_builder(to="categories"))
+        case 3:
+            builder.attach(back_builder(to="lots"))
+        case _:
+            pass
 
-    builder.button(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())
     builder.adjust(1)
     return builder.as_markup()
 
-def categories_list_mk():
+def back_builder(to: str, id: int = None):
     builder = InlineKeyboardBuilder()
-    categories_list = cur.execute("SELECT * FROM categories").fetchall()
 
-    for category in categories_list:
-        builder.add(InlineKeyboardButton(text=category[1], callback_data=AdminHandler(value = "category_click").pack()))
+    match to:
+        case "admin":
+            builder.button(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())
+        case "categories":
+            builder.button(text="🔙 Назад", callback_data=UserChoose(type = "back_categories").pack())
+        case "lots":
+            builder.button(text="🔙 Назад", callback_data=UserChoose(type = "category", id=id).pack())
 
-    builder.button(text="🔙 Назад", callback_data=AdminHandler(value = "back").pack())
+    builder.adjust(1)
+    return builder
+
+def buy_builder(id: int,category_id: int, price: int):
+    builder = InlineKeyboardBuilder()
+    builder.button(text=f"{price}₴ | Купити ✅", callback_data=UserChoose(type = "buy_lot",id = id).pack())
+    builder.attach(back_builder(to="lots", id=category_id))
+
+    builder.adjust(1)
+    return builder.as_markup()
+
+def user_orders(user_id: int):
+    builder = InlineKeyboardBuilder()
+    
+    orders = cur.execute("SELECT * FROM orders WHERE buyer_id = ?",(user_id,)).fetchall()
+    for order in orders:
+        lot = cur.execute("SELECT * FROM lots WHERE id = ?",(order[2],)).fetchone()
+        builder.button(text=f"ID:{order[0]} {lot[1]} | {order[3]}₴",callback_data=UserChoose(type = "none").pack())
+
     builder.adjust(1)
     return builder.as_markup()
