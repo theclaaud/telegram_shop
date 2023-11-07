@@ -1,7 +1,7 @@
 import sqlite3
 import os
 from aiogram import Router, F, Bot
-from aiogram.types import CallbackQuery, Message, LabeledPrice, PreCheckoutQuery
+from aiogram.types import CallbackQuery, Message, LabeledPrice, PreCheckoutQuery, SuccessfulPayment
 from keyboards.inline import UserChoose, smart_builder, buy_builder
 from dotenv import load_dotenv
 
@@ -34,7 +34,7 @@ async def send_invoice(query: CallbackQuery, callback_data: UserChoose):
     
     await query.message.answer_invoice(title=lot_data[1],
                                        description=lot_data[2],
-                                       payload=lot_data[1],
+                                       payload=str(lot_data[0]),
                                        provider_token=os.getenv("PAY_ID"),
                                        currency="uah",
                                        prices=[LabeledPrice(label=lot_data[1], amount=lot_data[3]*100)],
@@ -44,11 +44,19 @@ async def send_invoice(query: CallbackQuery, callback_data: UserChoose):
                                        need_email=True,
                                        need_shipping_address=True,
                                        )
+    await query.answer()
 
 @router.pre_checkout_query()
 async def pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: Bot):
     await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
 
 @router.message(F.successful_payment)
-async def successful_payment(message: Message):
-    await message.answer(text="\n".join([f"{key}: {value}" for key, value in message.successful_payment.order_info]))
+async def successful_payment(message: Message, bot: Bot):
+    lot = cur.execute("SELECT * FROM lots WHERE id = ?",(message.successful_payment.invoice_payload,)).fetchone()
+    cur.execute("INSERT INTO orders (buyer_id, lot_id, summ) VALUES (?, ?, ?)", (message.from_user.id, lot[0], str(message.successful_payment.total_amount)[:-2]))
+    con.commit()
+    await bot.send_message(
+        chat_id=os.getenv("ORDERS_CHAT_ID"),
+        text=f"Замовник: @{message.from_user.username}\nСума: {str(message.successful_payment.total_amount)[:-2]}₴\nТовар: {lot[1]} \n"+"\n".join([f"{key}: {value}" for key, value in message.successful_payment.order_info]),
+        )
+    await message.answer("Ваше замовлення створено, з вами зв'яжеться адміністратор.")

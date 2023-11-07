@@ -20,8 +20,8 @@ async def category_list(message: types.Message):
 
 @router.message(F.text == "🤵 Особистий кабінет")
 async def help(message: types.Message):
-    await message.answer("Особистий кабінет")
+    await message.answer(f"Вітаю, <b>{message.from_user.first_name}</b>\nВаш ID: <code>{message.from_user.id}</code>\nВаші замовлення:",reply_markup=inline.user_orders(message.from_user.id))
 
 @router.message(F.text == "⁉️ Допомога")
 async def help(message: types.Message):
-    await message.answer("Допомога")
+    await message.answer("Тех.підтримка: @theclaud")

@@ -104,3 +104,14 @@ def buy_builder(id: int,category_id: int, price: int):
 
     builder.adjust(1)
     return builder.as_markup()
+
+def user_orders(user_id: int):
+    builder = InlineKeyboardBuilder()
+    
+    orders = cur.execute("SELECT * FROM orders WHERE buyer_id = ?",(user_id,)).fetchall()
+    for order in orders:
+        lot = cur.execute("SELECT * FROM lots WHERE id = ?",(order[2],)).fetchone()
+        builder.button(text=f"ID:{order[0]} {lot[1]} | {order[3]}₴",callback_data=UserChoose(type = "none").pack())
+
+    builder.adjust(1)
+    return builder.as_markup()
