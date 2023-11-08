@@ -9,3 +9,6 @@ class AddLot(StatesGroup):
     price = State()
     category = State()
     image = State()
+
+class SetupUser(StatesGroup):
+    id = State()

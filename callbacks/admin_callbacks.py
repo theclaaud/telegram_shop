@@ -2,10 +2,10 @@ import sqlite3
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
-from utils.states import AddCategory, AddLot
-from keyboards.inline import (AdminHandler, RemoveItems,
+from utils.states import AddCategory, AddLot, SetupUser
+from keyboards.inline import (AdminHandler, RemoveItems, 
                               setup_cut_mk, admin_mk ,setup_lot_mk,clear_state_mk, back_mk,
-                              smart_builder)
+                              smart_builder, user_orders)
 
 router = Router()
 con = sqlite3.connect("database.db")
@@ -101,9 +101,28 @@ async def remove_lot(query: CallbackQuery, callback_data: AdminHandler):
     await query.message.edit_text("✅ Ви видалили товар", reply_markup=back_mk)
 
 @router.callback_query(AdminHandler.filter(F.value == "users"))
-async def setup_users(query: CallbackQuery, callback_data: AdminHandler):
+async def get_userid(query: CallbackQuery, callback_data: AdminHandler, state: FSMContext):
+    await state.set_state(SetupUser.id)
     await query.message.edit_text("Введіть id користувача:", reply_markup=clear_state_mk)
-    await query.answer()
+
+@router.message(SetupUser.id)
+async def setup_user(message: Message, state: FSMContext):
+    try:
+        user = cur.execute("SELECT * FROM users WHERE id = ?", (message.text,)).fetchone()
+        await message.answer(f"Виберіть дію з користувачем {user[0]}", reply_markup=setup_user(user[0]))
+    except Exception as e:
+        await message.answer(f"{e}")
+        # await message.answer(f"Користувача не знайдено!")
+    await state.clear()
+
+@router.callback_query(AdminHandler.filter(F.value == "give_admin"))
+async def user_orders(message: Message, callback_data: AdminHandler):
+    pass # видати адміністратора
+
+@router.callback_query(AdminHandler.filter(F.value == "view_orders"))
+async def user_orders(message: Message, callback_data: AdminHandler):
+    user = cur.execute("SELECT * FROM users WHERE id = ?", (callback_data.id,)).fetchone()
+    await message.answer(f"\nID: <code>{user[0]}</code>\nзЗамовлення:", reply_markup=user_orders(user[0]))
 
 @router.callback_query(AdminHandler.filter(F.value == "clear_state"))
 async def clear_state(query: CallbackQuery, callback_data: AdminHandler, state: FSMContext):
