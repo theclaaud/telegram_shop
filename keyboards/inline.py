@@ -105,13 +105,29 @@ def buy_builder(id: int,category_id: int, price: int):
     builder.adjust(1)
     return builder.as_markup()
 
-def user_orders(user_id: int):
+def user_orders_mk(user_id: int):
     builder = InlineKeyboardBuilder()
     
     orders = cur.execute("SELECT * FROM orders WHERE buyer_id = ?",(user_id,)).fetchall()
     for order in orders:
         lot = cur.execute("SELECT * FROM lots WHERE id = ?",(order[2],)).fetchone()
         builder.button(text=f"ID:{order[0]} {lot[1]} | {order[3]}₴",callback_data=UserChoose(type = "none").pack())
+
+    builder.adjust(1)
+    return builder.as_markup()
+
+def setup_user_builder(user_id: int):
+    builder = InlineKeyboardBuilder()
+    
+    user_admin = cur.execute("SELECT is_admin FROM users WHERE id = ?",(user_id,)).fetchone()[0]
+    builder.button(text="Забрати адміна" if user_admin else "Зробити адміністратором", callback_data=UserChoose(type = "give_admin", id=user_id).pack())
+    
+    builder.button(text="Переглянути замовлення", callback_data=UserChoose(type = "view_orders", id=user_id).pack())
+    
+    # orders = cur.execute("SELECT * FROM orders WHERE buyer_id = ?",(user_id,)).fetchall()
+    # for order in orders:
+    #     lot = cur.execute("SELECT * FROM lots WHERE id = ?",(order[2],)).fetchone()
+    #     builder.button(text=f"ID:{order[0]} {lot[1]} | {order[3]}₴",callback_data=UserChoose(type = "none").pack())
 
     builder.adjust(1)
     return builder.as_markup()
