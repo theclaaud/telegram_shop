@@ -3,9 +3,9 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
 from utils.states import AddCategory, AddLot, SetupUser
-from keyboards.inline import (AdminHandler, RemoveItems, 
+from keyboards.inline import (AdminHandler, RemoveItems, UserChoose,
                               setup_cut_mk, admin_mk ,setup_lot_mk,clear_state_mk, back_mk,
-                              smart_builder, user_orders)
+                              smart_builder, user_orders_mk, setup_user_builder)
 
 router = Router()
 con = sqlite3.connect("database.db")
@@ -109,21 +109,23 @@ async def get_userid(query: CallbackQuery, callback_data: AdminHandler, state: F
 async def setup_user(message: Message, state: FSMContext):
     try:
         user = cur.execute("SELECT * FROM users WHERE id = ?", (message.text,)).fetchone()
-        await message.answer(f"Виберіть дію з користувачем {user[0]}", reply_markup=setup_user(user[0]))
-    except Exception as e:
-        await message.answer(f"{e}")
-        # await message.answer(f"Користувача не знайдено!")
+        await message.answer(f"Виберіть дію з користувачем {user[0]}", reply_markup=setup_user_builder(user[0]))
+    except:
+        # await message.answer(f"{e}")
+        await message.answer(f"Користувача не знайдено!")
     await state.clear()
 
-@router.callback_query(AdminHandler.filter(F.value == "give_admin"))
-async def user_orders(message: Message, callback_data: AdminHandler):
-    pass # видати адміністратора
-
-@router.callback_query(AdminHandler.filter(F.value == "view_orders"))
-async def user_orders(message: Message, callback_data: AdminHandler):
-    user = cur.execute("SELECT * FROM users WHERE id = ?", (callback_data.id,)).fetchone()
-    await message.answer(f"\nID: <code>{user[0]}</code>\nзЗамовлення:", reply_markup=user_orders(user[0]))
-
+@router.callback_query(UserChoose.filter(F.type == "give_admin"))
+async def user_orders(query: CallbackQuery, callback_data: AdminHandler):
+    user_admin = cur.execute("SELECT is_admin FROM users WHERE id = ?",(callback_data.id,)).fetchone()[0]
+    cur.execute("UPDATE users SET is_admin = ? WHERE id = ?",(False if user_admin else True, callback_data.id))
+    con.commit()
+    await query.message.edit_text("Дані змінено.")
+    
+@router.callback_query(UserChoose.filter(F.type == "view_orders"))
+async def user_orders(query: CallbackQuery, callback_data: AdminHandler):
+    await query.message.answer(f"\nID: <code>{callback_data.id}</code>\nЗамовлення:", reply_markup=user_orders_mk(user_id=callback_data.id))
+    await query.answer()
 @router.callback_query(AdminHandler.filter(F.value == "clear_state"))
 async def clear_state(query: CallbackQuery, callback_data: AdminHandler, state: FSMContext):
     await state.clear()
